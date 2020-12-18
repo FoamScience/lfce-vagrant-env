@@ -1,8 +1,11 @@
-#!/bin/bash
+#!/usr/bin/bash
+
+# Disable strict key checking
 sed -i "s/.*StrictHostKeyChecking.*/StrictHostKeyChecking no/" /etc/ssh/ssh_config
 
-nodes=("box" "node1" "node2")
+nodes=("server0" "node1" "node2" "web1" "web2")
 
+# Allow SSH access to nodes and webservers
 for i in $(seq 0 $(( ${#nodes[@]} - 1 )) ); do
     if ! grep -q ${nodes[$i]} /etc/ssh/ssh_config ; then
         cat >> /etc/ssh/ssh_config <<EOF

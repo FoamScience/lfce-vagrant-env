@@ -1,54 +1,42 @@
 # lfce-vagrant-env
 
-This repo brings up an Linux Foundation Certified Engineer (LFCE) Centos 7 exam simulation environment with the help of Vagrant. Several nodes are created and you perform various tasks on each during the exam. The environment has the following properties:
+This is an improved fork of `lrakai/lfce-vagrant-env` to bring up LFCE CentOS 7 exam
+simulation environment with the help of Vagrant.
 
-- Each node has all of the other nodes in its `/etc/hosts` file. 
-- The starting node is `box`. 
-    - You can `ssh` from box to any other node in the environment. 
-    - Only the `box` node can `ssh` to other nodes in the environment. After completing a task, return to the `box` node before connecting to another node. 
+A central server with 4 other CentOS 7 nodes are created:
+
+- Virtualbox is used as the provider for all nodes
+- Each node has all of the other nodes in its `/etc/hosts` file and has the
+  default NAT interface alongside an interface put on the `10.0.0.0/24` range
+  for seamless SSH access to all nodes.
+- The starting node is `server0`. 
+    - You can `ssh` from server0 to any other node in the environment. 
+    - Only the `server0` node can `ssh` to other nodes in the environment.
+      However, ports on server0 are forwarded to your local machine; so
+      `./access_vm.sh node1` will take you to `node1` for example
 - Root access can be obtain with `sudo -i` on any node.
-
-## Exam Tasks
-
-You can create tasks to complete based on the [LFCE domains and competencies](https://training.linuxfoundation.org/certification/linux-foundation-certified-engineer-lfce/#domains).
-
-## Prerequisites
-If you have not already installed vagrant and VirtualBox, you can run 
-```sh
-bash lib/prerequisites.sh
-```
+- `server0`, `node1` and `node2` also belong to private net: 10.5.1.0/24
+- `server0`, `web1` and `web2` also belong to private net: 10.5.2.0/24
+- `server0` is also connected to the pxe_net internal network (ip: 10.5.10.2)
+- Firewalld is disabled by default, SELinux is enforced on all nodes.
 
 ## Getting Started
 
 Bring up the exam environment with
 
-```sh
-bash up_exam.sh
+```bash
+# Create all 5 VMs
+vagrant up
 ```
 
-This automatically connects you to the `box` node in the exam environment. Prepare the systems as you prefer using packages from standard repos, for example:
-
-```sh
-sudo -i
-yum install -y pssh
-pssh -H box -H node1 -H node2 "yum install -y tmux bash-completion bash-completion-extras && mandb"
-exec bash
-```
-
-## Tips
-
-```sh
-man -k ... # search for commands by name, description
-man -wK ... # search for commands in man pages
-yum provides */binary # search for package providing a binary
-rpm -qf $(which binary) # which installed package provides a binary
-yum install setroubleshoot-server; sealert -a /var/log/audit/audit.log # Suggest resolutions for SELinux AVCs
-```
+Use `vagrant suspend` and `vagrant resume` individual VMs if you need so.
+It's also recommended to `vagrant snapshot` (the whole environment or
+individual VMs) throughout your training.
 
 ## Cleaning Up
 
-Destroy the exam environment with
+You can destroy the exam environment (or individual machines) with 
+`vagrant destroy`
 
-```sh
-bash destroy_exam.sh
-```
+You can also modify VM configuration in `Vagrantfile` and
+`vagrant reload vm-name`
