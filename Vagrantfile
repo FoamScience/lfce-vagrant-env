@@ -1,10 +1,11 @@
-nodes = [
-  { :hostname => "server0", :ip => "10.0.0.100", ssh_host_port: 2221, :box => "centos/7", :ram => 512 },
-  { :hostname => "node1", :ip => "10.0.0.101", ssh_host_port: 2222, :box => "centos/7", :ram => 512 },
-  { :hostname => "node2", :ip => "10.0.0.102", ssh_host_port: 2223, :box => "centos/7", :ram => 512 },
-  { :hostname => "web1", :ip => "10.0.0.103", ssh_host_port: 2224, :box => "centos/7", :ram => 512 },
-  { :hostname => "web2", :ip => "10.0.0.104", ssh_host_port: 2225, :box => "centos/7", :ram => 512 },
-]
+# Read node hostnames, ips on the common network, and ssh-forwarded ports
+# from a YAML file (Should be generated with provisioners/nodes.sh script)
+
+# Run `./provisioners/nodes.sh /tmp/node-hostnames.yml /dev/null`
+# before vagrant * to generate an example yaml file
+#
+require 'yaml'
+nodes = YAML.load_file("/tmp/node-hostnames.yml")
 
 Vagrant.configure("2") do |config|
   config.vm.box_check_update = false
@@ -39,6 +40,10 @@ Vagrant.configure("2") do |config|
       nodeconfig.ssh.insert_key = false # uses vagrant insecure key
 
       ### Individual VM provisionning
+      config.vm.provision "shell" do |s| 
+        s.path = "provisioners/nodes.sh"
+        s.args = ["/dev/null", "/etc/hosts"]
+      end
       nodeconfig.vm.provision "common", type: "shell", path: "provisioners/common.sh"
       if File.file?("provisioners/#{node[:hostname]}.sh")
         nodeconfig.vm.provision node[:hostname], type: "shell",
@@ -60,9 +65,13 @@ Vagrant.configure("2") do |config|
         ## Attach extra 100MB-disks to nodes for ISCSI and LVM training
         ## Note: Should this be moved to individual provisioning scripts
         if node[:hostname].include? "node"
-          # Create a dedicated SATA controller
-          vb.customize ['storagectl', :id, '--name', 'SATA', '--add', 'sata',
+          # Create a dedicated SATA controller for centos Image if it doesn't exist
+          unless File.exist?(File.expand_path("./#{node[:hostname]}-extradisk0.vdi"))
+            # Centos 7 image doesn't come with a SATA, so if it's created, we did are
+            # the ones who did it before; and this is probably a reload
+            vb.customize ['storagectl', :id, '--name', 'SATA', '--add', 'sata',
                         '--controller', 'IntelAhci']
+          end
           for i in 0..11
             disk = "./#{node[:hostname]}-extradisk#{i}.vdi"
             # Create the file if doesn't exist
