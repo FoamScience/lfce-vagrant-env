@@ -30,7 +30,7 @@ Bring up the exam environment with
 
 ```bash
 # Create all 5 VMs
-./provisioners/nodes.sh /tmp/node-hostnames.yml /dev/null
+./provisioners/nodes.sh node-hostnames.yml /dev/null
 vagrant up
 # Or, do it in parallel (virtualbox provider sadly doesn't support native parallelism)
 printf %s\\n {server0,node1,node2,web1,web2} | xargs -P5 -n1 vagrant up

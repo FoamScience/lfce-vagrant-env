@@ -1,0 +1,26 @@
+---
+- :hostname:  server0
+  :ip: 10.0.0.100
+  :ssh_host_port: 2221
+  :box: centos/7
+  :ram: 1024
+- :hostname:  node1
+  :ip: 10.0.0.101
+  :ssh_host_port: 2222
+  :box: centos/7
+  :ram: 512
+- :hostname:  node2
+  :ip: 10.0.0.102
+  :ssh_host_port: 2223
+  :box: centos/7
+  :ram: 512
+- :hostname:  web1
+  :ip: 10.0.0.103
+  :ssh_host_port: 2224
+  :box: centos/7
+  :ram: 512
+- :hostname:  web2
+  :ip: 10.0.0.104
+  :ssh_host_port: 2225
+  :box: centos/7
+  :ram: 512

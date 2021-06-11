@@ -1,11 +1,11 @@
 # Read node hostnames, ips on the common network, and ssh-forwarded ports
 # from a YAML file (Should be generated with provisioners/nodes.sh script)
 
-# Run `./provisioners/nodes.sh /tmp/node-hostnames.yml /dev/null`
+# Run `./provisioners/nodes.sh node-hostnames.yml /dev/null`
 # before vagrant * to generate an example yaml file
 #
 require 'yaml'
-nodes = YAML.load_file("/tmp/node-hostnames.yml")
+nodes = YAML.load_file("./node-hostnames.yml")
 
 Vagrant.configure("2") do |config|
   config.vm.box_check_update = false
